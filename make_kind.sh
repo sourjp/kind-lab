@@ -13,7 +13,7 @@ echo ""
 echo "Please type kind's number.(e.g. 1)"
 read -p "Cluster type: " CLUSTER_NUMBER
 
-CLUSTER_NAME=$LOGIN_USER"_k8s" 
+CLUSTER_NAME=$LOGIN_USER"-k8s" 
 
 # Define cluster type
 if [ $CLUSTER_NUMBER -eq 1 ]; then
@@ -27,8 +27,8 @@ fi
 # step1. Make Login account and home directory for using 
 CHECK_USER=$(cat /etc/passwd | grep -o $LOGIN_USER | awk NR==1)
 
-if [ $CHECK_USER = $LOGIN_USER ]; then
-    echo "You already have your ID, Please access previous password after k8s cluster has created. If you forgot, please change or delete password by yourself."
+if [ "$CHECK_USER" = "$LOGIN_USER" ]; then
+    echo "Note: You already have your ID, Please access previous password after k8s cluster has created. If you forgot, please change or delete password by yourself."
 
 else
     sudo useradd -m $LOGIN_USER -p $LOGIN_PASSWORD -s /bin/bash
@@ -38,14 +38,16 @@ fi
 sleep 2
 
 # step2. Make k8s cluster.
-sudo kind create cluster --name $CLUSTER_NAME --config $CLUSTER_TYPE
+kind create cluster --name $CLUSTER_NAME --config $CLUSTER_TYPE
 
 sleep 2
 
 # step3. Set KUBECONFIG for accessing to k8s cluster.
-echo -n "export KUBECONFIG="$(kind get kubeconfig-path --name=$CLUSTER_NAME)” | sudo tee /home/$LOGIN_USER/.bash_profile
 sudo mkdir /home/$LOGIN_USER/.kube/
-sudo mv -f ~/.kube/kind-config-$CLUSTER_NAME /home/$LOGIN_USER/.kube/
+sudo mv -f ~/.kube/kind-config-$CLUSTER_NAME /home/$LOGIN_USER/.kube/kind-config-$CLUSTER_NAME
+sudo touch /home/$LOGIN_USER/.bash_profile
+echo -n "export KUBECONFIG=/home/$LOGIN_USER/.kube/kind-config-$CLUSTER_NAME" | sudo tee /home/$LOGIN_USER/.bash_profile > /dev/null
+sudo chown $LOGIN_USER -R /home/$LOGIN_USER/.kube /home/$LOGIN_USER/.bash_profile
 
 echo "Now you can access to your k8s cluster!"
 echo "Please login terminal as '$LOGIN_USER' and press 'kubectl get node'."
