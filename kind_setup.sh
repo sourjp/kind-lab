@@ -45,3 +45,4 @@ sudo gpasswd -a $USER docker
 sudo systemctl restart docker
 
 echo "Install has finished!!"
+echo "Please re-login to terminal for applying docker premission."

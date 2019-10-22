@@ -31,7 +31,8 @@ if [ "$CHECK_USER" = "$LOGIN_USER" ]; then
     echo "Note: You already have your ID, Please access previous password after k8s cluster has created. If you forgot, please change or delete password by yourself."
 
 else
-    sudo useradd -m $LOGIN_USER -p $LOGIN_PASSWORD -s /bin/bash
+    ENCRYPTED_LOGIN_PASSWORD=$(perl -e "print(crypt('$LOGIN_PASSWORD','a5'));")
+    sudo useradd -m $LOGIN_USER -p $ENCRYPTED_LOGIN_PASSWORD -s /bin/bash
 
 fi
 
